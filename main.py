@@ -1,6 +1,4 @@
-import gym_manager
+from gym_manager import Tui
 
-tui = gym_manager.Tui()
-while True:
-    tui.clear()
-    tui.render()
+tui = Tui()
+tui.run()
