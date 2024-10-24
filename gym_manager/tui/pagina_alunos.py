@@ -1,21 +1,33 @@
 from .content import Content, curses
-from ._tui import VERTICAL_SCROLLBAR
 from curses.textpad import Textbox
+from .scrollbar import Scrollbar
 
 class PagAlunos:
     def __init__(self, content : Content):
         self.content = content
         self.alunos = []
+        self.vscrollbar = Scrollbar(self.content.tui, True)
+        self.hscrollbar = Scrollbar(self.content.tui, False)
     def preswitch(self):
         pass
+    def resize(self):
+        self.vscrollbar.resize()
+        self.hscrollbar.resize()
     def switch(self):
-        self.content.tui.logica.CriarUtilizador("Rodrigo Ribeiro", "telefone", "email", "morada", "idade")
         self.alunos = self.content.tui.logica.db.ListarAlunos()
+    def input(self, ch):
+        if ch == curses.KEY_DOWN and self.vscrollbar.needed:
+            self.vscrollbar.current = (self.vscrollbar.current + 1) % self.vscrollbar.max
+        elif ch == curses.KEY_UP and self.vscrollbar.needed:
+            self.vscrollbar.current = (self.vscrollbar.current - 1) % self.vscrollbar.max
+        elif ch == curses.KEY_RIGHT and self.hscrollbar.needed:
+            self.hscrollbar.current = (self.hscrollbar.current + 1) % self.hscrollbar.max
+        elif ch == curses.KEY_LEFT and self.hscrollbar.needed:
+            self.hscrollbar.current = (self.hscrollbar.current - 1) % self.hscrollbar.max
     def render(self):
-        vscrollbar = self.content.tui.windows[VERTICAL_SCROLLBAR] 
         if len(self.alunos)+3 > 255:
-            vscrollbar.needed = True
-            vscrollbar.max = len(self.alunos)
+            self.vscrollbar.needed = True
+            self.vscrollbar.max = len(self.alunos)
 
         page = self.content.pad
 
@@ -39,9 +51,12 @@ class PagAlunos:
         cols_neeeded = sum(alinhamentos) + len(attrs)*3 + 1
         page.resize(255, cols_neeeded)
 
-        py,px = page.getmaxyx()
-        colunas_por_titl = px // len(alinhamentos)
-        resto_colunas =  px % len(alinhamentos)
+        if cols_neeeded > self.content.maxcols:
+            self.hscrollbar.needed = True
+            self.hscrollbar.max = cols_neeeded-self.content.maxcols
+            print(self.hscrollbar.max)
+
+        _,px = page.getmaxyx()
         
         page.move(2,1)
         page.hline("-", px-1)
@@ -59,7 +74,7 @@ class PagAlunos:
             page.addstr(1, offset + size, titulo)  
             offset += alinhamentos[i] + 3
         line = 3
-        start = vscrollbar.current
+        start = self.vscrollbar.current
         for x in range(start, len(self.alunos)):
             aluno = self.alunos[x]
             offset = 2
@@ -70,3 +85,7 @@ class PagAlunos:
             line+=1
             if line >= 255:
                 break
+    def refresh(self):
+        self.content.pad.refresh(0,self.hscrollbar.current,3,0, self.content.tui.maxlines-1-2, self.content.tui.maxcols-2) # -2 para o espaço em branco entre a scrollbar e o tamanho da scrollbar 
+        self.vscrollbar.render()
+        self.hscrollbar.render()

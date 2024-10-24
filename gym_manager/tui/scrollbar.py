@@ -13,27 +13,32 @@ class Scrollbar:
         self.tui = tui
 
         if vertical:
-            self.window = curses.newpad(self.maxlines-3, 1)
+            self.pad = curses.newpad(self.maxlines-3, 1) #-3 pelo tamanho do header
         else:
-            self.window = curses.newpad(1, self.maxcols-1)
+            self.pad = curses.newpad(1, self.maxcols-2) #-2 para não bater no scrollbar vertical
     def resize(self):
         self.maxlines = self.tui.maxlines
         self.maxcols = self.tui.maxcols
+        self.pad.clear()
         if self.vertical:
-            self.window.resize(self.maxlines-3, 1)
+            self.pad.resize(self.maxlines-3, 1)
+        else:
+            self.pad.resize(1, self.maxcols-2)
     def render(self):
-        self.window.erase()
+        self.pad.clear()
+        sy, sx = self.pad.getmaxyx()
+
         if not self.needed or self.max == 0:
             return
         if self.vertical:
-            for i in range(self.maxlines-4):
-                self.window.addch("█")
-            line = min(math.floor((self.current*self.maxlines)/self.max), self.maxlines-5)
-            self.window.addch(line,0,"X")
-            self.window.refresh(0,0,3,self.maxcols-1, self.maxlines-1, self.maxcols-1)
+            for i in range(sy-1):
+                self.pad.addch("█")
+            line = min(math.floor((self.current*self.maxlines)/self.max), sy-2) # -1 pelo limite e -1 porque as llinhas começam a contar do 0
+            self.pad.addch(line,0,"X")
+            self.pad.refresh(0,0,3,self.maxcols-1, self.maxlines-1, self.maxcols-1)
         else:
-            for i in range(self.maxcols-2):
-                self.window.addch("█")
-            col = min(math.floor((self.current*self.maxcols)/self.max), self.maxcols-3)
-            self.window.addch(0, col, "X")
-            self.window.refresh(0,0,self.maxlines-2,0,self.maxlines-2, self.maxcols-2)
+            for i in range(sx-1):
+                self.pad.addch("█")
+            col = min(math.floor((self.current*self.maxcols)/self.max), sx-1)
+            self.pad.addch(0, col, "X")
+            self.pad.refresh(0,0,self.maxlines-1,0,self.maxlines-1, self.maxcols-1)

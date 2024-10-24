@@ -4,14 +4,11 @@ from ..logica import Logica
 
 TAB_WINDOW = "TAB"
 CONTENT_WINDOW = "CONTENT"
-VERTICAL_SCROLLBAR = "VSCROLLBAR"
-HORIZONTAL_SCROLLBAR = "HSCROLLBAR"
 
 class Tui:
     def init(self, screen):
         from .header import Header
         from .content import Content
-        from .scrollbar import Scrollbar
         self.screen = screen     
         self.running = True
         self.maxlines, self.maxcols = self.screen.getmaxyx() 
@@ -23,8 +20,6 @@ class Tui:
         self.windows = {
             TAB_WINDOW: Header(self), 
             CONTENT_WINDOW: Content(self),
-            VERTICAL_SCROLLBAR: Scrollbar(self, True),
-            HORIZONTAL_SCROLLBAR: Scrollbar(self, False)
         }
         self.__run()
 
@@ -46,14 +41,8 @@ class Tui:
                     self.windows[TAB_WINDOW].selected = (self.windows[TAB_WINDOW].selected + 1) % len(self.windows[TAB_WINDOW].tabs)
                     self.screen.erase()
                     self.windows[CONTENT_WINDOW].switch(self.windows[TAB_WINDOW].selected)
-                elif ch == curses.KEY_DOWN:
-                    self.windows[VERTICAL_SCROLLBAR].current = (self.windows[VERTICAL_SCROLLBAR].current + 1) % self.windows[VERTICAL_SCROLLBAR].max
-                elif ch == curses.KEY_UP:
-                    self.windows[VERTICAL_SCROLLBAR].current = (self.windows[VERTICAL_SCROLLBAR].current - 1) % self.windows[VERTICAL_SCROLLBAR].max
-                elif ch == curses.KEY_RIGHT:
-                    self.windows[HORIZONTAL_SCROLLBAR].current = (self.windows[HORIZONTAL_SCROLLBAR].current + 1) % self.windows[HORIZONTAL_SCROLLBAR].max
-                elif ch == curses.KEY_LEFT:
-                    self.windows[HORIZONTAL_SCROLLBAR].current = (self.windows[HORIZONTAL_SCROLLBAR].current - 1) % self.windows[HORIZONTAL_SCROLLBAR].max
+                else:
+                    self.windows[CONTENT_WINDOW].input(ch)
                 for (_, window) in self.windows.items():
                     window.render()
         except KeyboardInterrupt:

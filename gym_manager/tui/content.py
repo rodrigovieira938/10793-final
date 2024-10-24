@@ -1,5 +1,5 @@
 import curses
-from ._tui import Tui, TAB_WINDOW, VERTICAL_SCROLLBAR, HORIZONTAL_SCROLLBAR
+from ._tui import Tui, TAB_WINDOW
 from ..logica import Utilizador
 
 class Content:
@@ -13,7 +13,7 @@ class Content:
         self.tui = tui
         self.maxcols = tui.maxcols
         self.maxlines = tui.maxlines
-        self.pad = curses.newpad(255, 255) # -3 para o header -1 para a scrollbar
+        self.pad = curses.newpad(255, 255)
         self.selected = 0
         self.pages = [
             PagInicial(self),
@@ -22,13 +22,16 @@ class Content:
             PagInstrutor(self),
             PagAulas(self),
         ]
-
     def resize(self):
-        pass #Não é preciso já que usa um pad e não uma window
+        self.maxcols = self.tui.maxcols
+        self.maxlines = self.tui.maxlines
+        self.pages[self.selected].resize()
     def render(self):
         self.pad.clear()
         self.pages[self.selected].render()
-        self.pad.refresh(0,0,3,0, self.tui.maxlines-4, self.tui.maxcols-3)
+        self.pages[self.selected].refresh()
+    def input(self, ch):
+        self.pages[self.selected].input(ch)
     def preswitch(self, selected):
         self.pages[selected].preswitch()
     def switch(self, selected):
