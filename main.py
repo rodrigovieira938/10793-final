@@ -1,4 +1,3 @@
-from gym_manager import Tui
+import gym_manager
 
-tui = Tui()
-tui.run()
+gym_manager.run()
