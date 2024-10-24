@@ -1,5 +1,6 @@
 import sqlite3
-from .logica import Utilizador, Instrutor, Aulasgrupo
+from .Utilizador import Utilizador
+from .AulaGrupo import Aulasgrupo
 import datetime
 
 class Db:
@@ -38,7 +39,7 @@ class Db:
             """)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Inscricoes(
-                  id_aula INTEGER PRIMARY KEY,
+                  id_aula INTEGER,
                   id_aluno INTEGER
                 );
             """)
@@ -95,11 +96,11 @@ class Db:
             
             alunos = []
             for aluno in raw_alunos:
-                alunos.append(Utilizador(aluno[1], aluno[0], aluno[2], aluno[3], aluno[4], aluno[5]))
+                alunos.append(Utilizador(aluno[1], aluno[0], aluno[2], aluno[3], aluno[4], aluno[5], True))
             return alunos
         except sqlite3.Error as error:
             print('Ocorreu um erro ao listar alunos', error)
-    def ListarInstrutores(self) -> list[Instrutor]:
+    def ListarInstrutores(self) -> list[Utilizador]:
         try:
             cursor = self.sqliteConnection.cursor()
             cursor.execute("""SELECT * FROM Instrutores""")
@@ -108,7 +109,7 @@ class Db:
             
             instrutores = []
             for instrutor in raw_instrutores:
-                instrutores.append(Instrutor(instrutor[1], instrutor[0], instrutor[2], instrutor[3], instrutor[4], instrutor[5]))
+                instrutores.append(Utilizador(instrutor[1], instrutor[0], instrutor[2], instrutor[3], instrutor[4], instrutor[5], False))
             return instrutores
         except sqlite3.Error as error:
             print('Ocorreu um erro ao listar instrutores', error)
@@ -121,8 +122,20 @@ class Db:
             
             aulas = []
             for aula in raw_aulas:
-                #TODO: adicionar id á aula de grupo 
-                aulas.append(Aulasgrupo(self.ProcurarInstrutorID(aula[2]),datetime.datetime.strptime(aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), aula[1]))
+                aulas.append(Aulasgrupo(aula[0],self.ProcurarInstrutorID(aula[2]),datetime.datetime.strptime(aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), aula[1]))
+            return aulas
+        except sqlite3.Error as error:
+            print('Ocorreu um erro ao listar aulas de grupo', error)
+    def ListartAulaDeInstrutor(self, instrutor : Utilizador) -> list[Aulasgrupo]:
+        try:
+            cursor = self.sqliteConnection.cursor()
+            cursor.execute("SELECT * FROM Aulasgrupo where instrutor = ?", (instrutor.id,))
+            self.sqliteConnection.commit()
+            raw_aulas = cursor.fetchall()
+            
+            aulas = []
+            for aula in raw_aulas:
+                aulas.append(Aulasgrupo(aula[0],self.ProcurarInstrutorID(aula[2]),datetime.datetime.strptime(aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), aula[1]))
             return aulas
         except sqlite3.Error as error:
             print('Ocorreu um erro ao listar aulas de grupo', error)
@@ -138,10 +151,10 @@ class Db:
             return aulas
         except sqlite3.Error as error:
             print('Ocorreu um erro ao listar inscrições de um aluno', error)
-    def ListarInscricoesDeAula(self, alta : Aulasgrupo) -> list[Utilizador]:
+    def ListarInscricoesDeAula(self, aula : Aulasgrupo) -> list[Utilizador]:
         try:
             cursor = self.sqliteConnection.cursor()
-            cursor.execute("SELECT * FROM Inscricoes WHERE id_aula = ?", (1,)) #TODO: mudar 1 pela id da aula
+            cursor.execute("SELECT * FROM Inscricoes WHERE id_aula = ?", (aula.id,))
             self.sqliteConnection.commit()
             inscricoes = cursor.fetchall()
             aulas = []
@@ -158,7 +171,7 @@ class Db:
             raw_instrutor = cursor.fetchone()
             if(raw_instrutor == None):
                 return None
-            return Utilizador(raw_instrutor[1], raw_instrutor[0], raw_instrutor[2], raw_instrutor[3], raw_instrutor[4], raw_instrutor[5])
+            return Utilizador(raw_instrutor[1], raw_instrutor[0], raw_instrutor[2], raw_instrutor[3], raw_instrutor[4], raw_instrutor[5], True)
         except sqlite3.Error as error:
             print('Ocorreu um erro ao procurar utilizador', error)
     def ProcurarInstrutorID(self, id) -> Utilizador:
@@ -168,7 +181,7 @@ class Db:
             raw_instrutor = cursor.fetchone()
             if(raw_instrutor == None):
                 return None
-            return Instrutor(raw_instrutor[1], raw_instrutor[0], raw_instrutor[2], raw_instrutor[3], raw_instrutor[4], raw_instrutor[5])
+            return Utilizador(raw_instrutor[1], raw_instrutor[0], raw_instrutor[2], raw_instrutor[3], raw_instrutor[4], raw_instrutor[5], False)
         except sqlite3.Error as error:
             print('Ocorreu um erro ao procurar utilizador', error)
     def ProcurarAulaID(self, id) -> Aulasgrupo:
@@ -178,7 +191,6 @@ class Db:
             raw_aula = cursor.fetchone()
             if(raw_aula == None):
                 return None
-            #TODO: adicionar id á aula de grupo
-            return Aulasgrupo(self.ProcurarInstrutorID(raw_aula[2]),datetime.datetime.strptime(raw_aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(raw_aula[4], "%d/%m/%Y %H:%M"), raw_aula[1])
+            return Aulasgrupo(raw_aula[0],self.ProcurarInstrutorID(raw_aula[2]),datetime.datetime.strptime(raw_aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(raw_aula[4], "%d/%m/%Y %H:%M"), raw_aula[1])
         except sqlite3.Error as error:
             print('Ocorreu um erro ao procurar utilizador', error)
