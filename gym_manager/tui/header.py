@@ -3,9 +3,8 @@ from ._tui import Tui
 
 class Header:
     def __init__(self, tui: Tui):
-        self.tabs = ["Página inicial","Alunos", "Instrutores", "Aulas de Grupo"]
+        self.tabs = ["Página inicial","Registrar" ,"Alunos", "Instrutores", "Aulas de Grupo"]
         self.selected = 0
-
         self.tui = tui
         self.maxcols = tui.maxcols
         self.maxlines = tui.maxlines

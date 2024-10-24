@@ -1,5 +1,7 @@
 import curses
 import sys
+from ..logica import Logica
+
 TAB_WINDOW = "TAB"
 CONTENT_WINDOW = "CONTENT"
 VERTICAL_SCROLLBAR = "VSCROLLBAR"
@@ -13,6 +15,7 @@ class Tui:
         self.screen = screen     
         self.running = True
         self.maxlines, self.maxcols = self.screen.getmaxyx() 
+        self.logica = Logica()
 
         self.screen.nodelay(1)
         curses.curs_set(0)
@@ -39,7 +42,10 @@ class Tui:
                     for (_, w) in self.windows.items():
                         w.resize()
                 elif ch == ord("\t"):
+                    self.windows[CONTENT_WINDOW].preswitch(self.windows[TAB_WINDOW].selected)
                     self.windows[TAB_WINDOW].selected = (self.windows[TAB_WINDOW].selected + 1) % len(self.windows[TAB_WINDOW].tabs)
+                    self.screen.erase()
+                    self.windows[CONTENT_WINDOW].switch(self.windows[TAB_WINDOW].selected)
                 elif ch == curses.KEY_DOWN:
                     self.windows[VERTICAL_SCROLLBAR].current = (self.windows[VERTICAL_SCROLLBAR].current + 1) % self.windows[VERTICAL_SCROLLBAR].max
                 elif ch == curses.KEY_UP:
