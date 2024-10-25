@@ -1,6 +1,7 @@
 import curses
 import sys
 from ..logica import Logica
+import time
 
 TAB_WINDOW = "TAB"
 CONTENT_WINDOW = "CONTENT"
@@ -45,8 +46,9 @@ class Tui:
                     self.windows[CONTENT_WINDOW].input(ch)
                 for (_, window) in self.windows.items():
                     window.render()
+                time.sleep(1/60) #60 fps
         except KeyboardInterrupt:
-            curses.endwin()
+            pass
 
     def __resize(self, lines, cols):
         curses.resize_term(lines, cols)
