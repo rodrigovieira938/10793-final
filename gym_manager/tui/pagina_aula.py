@@ -1,19 +1,20 @@
-from .content import Content, curses, PAGINA_INSTRUTOR
+from .content import Content, curses
 from .scrollbar import Scrollbar
-from ._tui import TAB_WINDOW
-class PagInstrutores:
+
+class PagAula:
     def __init__(self, content : Content):
         self.content = content
-        self.instrutores = []
+        self.aula = None
+        self.alunos = None
         self.vscrollbar = Scrollbar(self.content.tui, True)
         self.hscrollbar = Scrollbar(self.content.tui, False)
-        self.state = 0
     def preswitch(self):
         pass
     def switch(self):
-        self.instrutores = self.content.tui.logica.db.ListarInstrutores()
+        self.content.tui.screen.erase()
+        self.alunos = self.content.tui.logica.db.ListarInscricoesDeAula(self.aula)
         self.vscrollbar.needed = True
-        self.vscrollbar.max = len(self.instrutores)
+        self.vscrollbar.max = len(self.alunos)
     def resize(self):
         self.vscrollbar.resize()
         self.hscrollbar.resize()
@@ -22,29 +23,24 @@ class PagInstrutores:
             self.vscrollbar.current = (self.vscrollbar.current + 1) % self.vscrollbar.max
         elif ch == curses.KEY_UP and self.vscrollbar.max > 0:
             self.vscrollbar.current = (self.vscrollbar.current - 1) % self.vscrollbar.max
-        elif ch == curses.KEY_RIGHT and self.hscrollbar.needed and (self.hscrollbar.current+1) <= self.hscrollbar.max      and self.hscrollbar.max > 0:
+        elif ch == curses.KEY_RIGHT and self.hscrollbar.needed and (self.hscrollbar.current+1) <= self.hscrollbar.max:
             self.hscrollbar.current = (self.hscrollbar.current + 1)
-        elif ch == curses.KEY_LEFT and self.hscrollbar.needed  and 0 <= (self.hscrollbar.current-1) <= self.hscrollbar.max and self.hscrollbar.max > 0:
+        elif ch == curses.KEY_LEFT and self.hscrollbar.needed  and 0 <= (self.hscrollbar.current-1) <= self.hscrollbar.max:
             self.hscrollbar.current = (self.hscrollbar.current - 1)
-        elif ch == ord("\n"):
-            if len(self.instrutores) == 0:
-                return
-            self.content.pages[PAGINA_INSTRUTOR].instrutor = self.instrutores[self.vscrollbar.current]
-            self.content.preswitch(PAGINA_INSTRUTOR)
-            self.content.tui.windows[TAB_WINDOW].selected_before = self.content.tui.windows[TAB_WINDOW].selected
-            self.content.tui.windows[TAB_WINDOW].selected = PAGINA_INSTRUTOR
-            self.content.switch(PAGINA_INSTRUTOR)
     def render(self):
         page = self.content.pad
-        selected_color = self.content.tui.selected_color
+        page.erase()
+        txt = f"Alunos incritos na aula \"{self.aula.nome}\" ({self.aula.id}) com {self.aula.instrutor.nome} ({self.aula.instrutor.id})\n"
+        page.addstr(txt)
 
+        ### Igual a Pagina Alunos
         def var_maior(alunos, attr):
             maior = 0
             for i in alunos:
                 maior = max(maior, len(str(getattr(i, attr))) +2)
             return maior
         attrs = [("Nome","nome"), ("ID", "id"), ("Telefone", "telefone"), ("Email","email"), ("Morada", "morada"), ("Idade","idade")]
-        alinhamentos = [c for attr in attrs if(c := var_maior(self.instrutores, attr[1]))]
+        alinhamentos = [c for attr in attrs if(c := var_maior(self.alunos, attr[1]))]
         if len(alinhamentos) > 0:
             for i in range(len(attrs)):
                 if len(alinhamentos) == 0:
@@ -53,56 +49,39 @@ class PagInstrutores:
                     alinhamentos[i] = max(alinhamentos[i], len(attrs[i][0])+2)
         else:
             alinhamentos = [len(titulo)+2 for (titulo,_) in attrs]
-        page.erase()
         cols_needed = sum(alinhamentos) + len(attrs) + 1
-        page.resize(255, cols_needed)
+        page.resize(255, max(cols_needed, len(txt)))
         
-        page.hline(2,1,"-", cols_needed-2)
-        page.vline(1,0,"|", 255)
+        page.hline(3,1,"-", cols_needed-2)
+        page.vline(2,0,"|", 255)
 
         offset:int = 0
         for i in alinhamentos:
             offset += i + 1
-            page.vline(1, offset, "|", 255)
-
-        if len(self.instrutores) > 0:
-            if curses.has_colors():
-                page.addch(3,0, " ", selected_color)
-                page.addch(3,cols_needed-1, " ", selected_color)
-            else:
-                page.addch(3,0, "X")
-                page.addch(3,cols_needed-1, "X")
-        
-
+            page.vline(2, offset, "|", 255)
         offset = 1
         for i in range(len(alinhamentos)):
             titulo = attrs[i][0]
             alinhamento = alinhamentos[i]
             size = (alinhamento - len(titulo))//2
-            page.addstr(1, offset+size, titulo)  
+            page.addstr(2, offset+size, titulo)  
             offset += alinhamentos[i] + 1
-       
-        line = 3
+        
+        line = 4
         start = self.vscrollbar.current
-        for x in range(start, len(self.instrutores)):
-            aluno = self.instrutores[x]
+        for x in range(start, len(self.alunos)):
+            aluno = self.alunos[x]
             offset = 2
-            color = 0
-            if self.vscrollbar.current == x and curses.has_colors():
-                color = selected_color
-                for i in range(1, cols_needed-1):
-                    page.addch(line, i, " ", color)
-                
             for i in range(len(attrs)):
                 attr = attrs[i]
-                page.addstr(line, offset, str(getattr(aluno, attr[1])), color)
+                page.addstr(line, offset, str(getattr(aluno, attr[1])))
                 offset += alinhamentos[i] + 1
             line+=1
             if line >= 255:
                 break
-        if cols_needed > self.content.tui.maxcols - 2: # -2 para o limite e para a scrollbar
+        if max(cols_needed,len(txt)) > self.content.tui.maxcols - 2: # -2 para o limite e para a scrollbar
             self.hscrollbar.needed = True
-            self.hscrollbar.max = cols_needed - (self.content.tui.maxcols - 2)# +2 para o limite e para a scrollbar
+            self.hscrollbar.max = max(cols_needed,len(txt)) - (self.content.tui.maxcols - 2)# +2 para o limite e para a scrollbar
         else:
             self.hscrollbar.current = 0
         self.vscrollbar.render()

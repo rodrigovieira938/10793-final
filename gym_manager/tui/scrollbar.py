@@ -6,7 +6,7 @@ class Scrollbar:
     def __init__(self, tui: Tui, vertical : bool):
         self.needed = False
         self.vertical = vertical
-        self.max = 255
+        self.max = 0
         self.current = 0
         self.maxcols = tui.maxcols
         self.maxlines = tui.maxlines
@@ -25,20 +25,23 @@ class Scrollbar:
         else:
             self.pad.resize(1, self.maxcols-2)
     def render(self):
-        self.pad.clear()
+        self.pad.erase()
         sy, sx = self.pad.getmaxyx()
 
-        if not self.needed or self.max == 0:
+        if self.needed == False or self.max == 0:
             return
         if self.vertical:
             for i in range(sy-1):
                 self.pad.addch("█")
             line = min(math.floor((self.current*self.maxlines)/self.max), sy-2) # -1 pelo limite e -1 porque as llinhas começam a contar do 0
             self.pad.addch(line,0,"X")
-            self.pad.refresh(0,0,3,self.maxcols-1, self.maxlines-1, self.maxcols-1)
         else:
             for i in range(sx-1):
                 self.pad.addch("█")
-            col = min(math.floor((self.current*self.maxcols)/self.max), sx-1)
+            col = min(math.floor((self.current*self.maxcols)/self.max), sx-2)
             self.pad.addch(0, col, "X")
+    def refresh(self):
+        if self.vertical:
+            self.pad.refresh(0,0,3,self.maxcols-2, self.maxlines-1, self.maxcols-1)
+        else:
             self.pad.refresh(0,0,self.maxlines-1,0,self.maxlines-1, self.maxcols-1)

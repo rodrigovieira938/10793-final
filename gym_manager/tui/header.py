@@ -19,7 +19,6 @@ class Header:
         max_columns = self.maxcols - 2 # - 1 para o limite e -1 para a primeira coluna
         columns_per_each = max_columns // len(self.tabs)
         leftover_columns = max_columns  % len(self.tabs)
-
         self.window.addch(1,0, "|")
         self.window.addch(1,self.maxcols-2, '|')
         self.window.hline(0,1, "-", self.maxcols-2)
@@ -47,16 +46,19 @@ class Header:
             attr = 0
             if self.selected == i:
                 attr = curses.A_BOLD
-
             if len(tab) < size: 
                 center = ((size - len(tab)) // 2) + ((size - len(tab)) % 2)
                 self.window.addstr(1,center + start,tab,attr)
             elif len(tab) == size:
                 self.window.addstr(1,start,tab,attr)
-            else:
-                tab = tab[0:size-3] + "..."
-                center = ((size - len(tab)) // 2) + ((size - len(tab)) % 2)
-                self.window.addstr(1,start+center, str(tab))
-                pass
-
+            elif len(tab)-2 < size:
+                tab = tab[0:-4] + "..."
+                self.window.addstr(1,start, str(tab), attr)
+            elif size >= 3:
+                center = ((size - 3) // 2) + ((size - 3) % 2)
+                self.window.addstr(1, start + center, "...")
+            elif size == 2:
+                self.window.addstr(1, start, "..")
+            elif size == 1:
+                self.window.addstr(1, start, ".")
         self.window.refresh()

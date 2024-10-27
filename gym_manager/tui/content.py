@@ -2,13 +2,20 @@ import curses
 from ._tui import Tui, TAB_WINDOW
 from ..logica import Utilizador
 
+PAGINA_ALUNO = 5
+PAGINA_INSTRUTOR = 6
+PAGINA_AULA = 7
+
 class Content:
     def __init__(self, tui: Tui):
         from .pagina_inicial import PagInicial
         from .pagina_registrar import PagRegistrar
         from .pagina_alunos import PagAlunos
-        from .pagina_instrutores import PagInstrutor
+        from .pagina_instrutores import PagInstrutores
         from .pagina_aulas import PagAulas
+        from .pagina_aluno import PagAluno
+        from .pagina_instrutor import PagInstrutor
+        from .pagina_aula import PagAula
 
         self.tui = tui
         self.maxcols = tui.maxcols
@@ -19,8 +26,11 @@ class Content:
             PagInicial(self),
             PagRegistrar(self),
             PagAlunos(self),
-            PagInstrutor(self),
+            PagInstrutores(self),
             PagAulas(self),
+            PagAluno(self),
+            PagInstrutor(self),
+            PagAula(self),
         ]
     def resize(self):
         self.maxcols = self.tui.maxcols

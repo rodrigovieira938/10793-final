@@ -30,6 +30,7 @@ class Db:
             """)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Aulasgrupo(
+                    nome TEXT,
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     limite_alunos INTEGER,
                     instrutor INTEGER,
@@ -68,12 +69,12 @@ class Db:
             return cursor.fetchone()[0]
         except sqlite3.Error as error:
             print('Ocorreu um erro ao criar o Instrutor', error)
-    def CriarAulaDeGrupo(self, instrutor : Utilizador, horainicio, horafinal, limit):
+    def CriarAulaDeGrupo(self,nome:str, instrutor : Utilizador, horainicio, horafinal, limit):
         try:
             cursor = self.sqliteConnection.cursor()
             cursor.execute('''
-                INSERT INTO Aulasgrupo (instrutor, horainicio, horafinal, limite_alunos) VALUES (?,?,?,?)            
-            ''', (instrutor.id, horainicio, horafinal, limit))
+                INSERT INTO Aulasgrupo (nome, instrutor, horainicio, horafinal, limite_alunos) VALUES (?,?,?,?,?)            
+            ''', (nome, instrutor.id, horainicio, horafinal, limit))
             cursor.execute("SELECT last_insert_rowid()")
             self.sqliteConnection.commit()
             return cursor.fetchone()[0]
@@ -122,7 +123,7 @@ class Db:
             
             aulas = []
             for aula in raw_aulas:
-                aulas.append(Aulasgrupo(aula[0],self.ProcurarInstrutorID(aula[2]),datetime.datetime.strptime(aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), aula[1]))
+                aulas.append(Aulasgrupo(aula[0],aula[1],self.ProcurarInstrutorID(aula[3]),datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[5], "%d/%m/%Y %H:%M"), aula[2]))
             return aulas
         except sqlite3.Error as error:
             print('Ocorreu um erro ao listar aulas de grupo', error)
@@ -135,7 +136,7 @@ class Db:
             
             aulas = []
             for aula in raw_aulas:
-                aulas.append(Aulasgrupo(aula[0],self.ProcurarInstrutorID(aula[2]),datetime.datetime.strptime(aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), aula[1]))
+                aulas.append(Aulasgrupo(aula[0], aula[1],self.ProcurarInstrutorID(aula[3]),datetime.datetime.strptime(aula[4], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(aula[5], "%d/%m/%Y %H:%M"), aula[2]))
             return aulas
         except sqlite3.Error as error:
             print('Ocorreu um erro ao listar aulas de grupo', error)
@@ -191,6 +192,6 @@ class Db:
             raw_aula = cursor.fetchone()
             if(raw_aula == None):
                 return None
-            return Aulasgrupo(raw_aula[0],self.ProcurarInstrutorID(raw_aula[2]),datetime.datetime.strptime(raw_aula[3], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(raw_aula[4], "%d/%m/%Y %H:%M"), raw_aula[1])
+            return Aulasgrupo(raw_aula[0], raw_aula[1],self.ProcurarInstrutorID(raw_aula[3]),datetime.datetime.strptime(raw_aula[4], "%d/%m/%Y %H:%M"), datetime.datetime.strptime(raw_aula[5], "%d/%m/%Y %H:%M"), raw_aula[2])
         except sqlite3.Error as error:
             print('Ocorreu um erro ao procurar utilizador', error)
