@@ -61,11 +61,11 @@ class Tui:
                 else:
                     self.windows[CONTENT_WINDOW].input(ch)
                 for (_, window) in self.windows.items():
-                    #try:
-                    window.render()
-                    #except Exception:
-                    #    self.maxlines, self.maxcols = self.screen.getmaxyx()
-                    #    self.__resize(self.maxlines, self.maxcols)
+                    try:
+                        window.render()
+                    except Exception:
+                        self.maxlines, self.maxcols = self.screen.getmaxyx()
+                        self.__resize(self.maxlines, self.maxcols)
                 time.sleep(1/60) #60 fps
         except KeyboardInterrupt:
             pass
