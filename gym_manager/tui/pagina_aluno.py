@@ -21,19 +21,36 @@ class PagAluno:
         self.state = 0
         self.selected = 0
         self.content.pad.erase()
-        self.aulas = self.content.tui.logica.db.ListarIncricoesDeAluno(self.aluno)
         self.vscrollbar.current = 0
         self.hscrollbar.current = 0
 
+        self.hscrollbar.resize()
+        self.vscrollbar.resize()
+
+        self.aulas_inscritas = self.content.tui.logica.db.ListarIncricoesDeAluno(self.aluno)
+        self.aulas_inscrever = []
+        
         aulas = self.content.tui.logica.db.ListarAulaDeGrupo()
 
-        now = datetime.datetime.now()
-        self.aulas_inscrever = []
         colsneeded = 0
+        
         for aula in aulas:
-            if aula.horainicio >= now:
+            incricoes = self.content.tui.logica.db.ListarInscricoesDeAula(aula)
+            found = False
+            for incricao in incricoes:
+                if self.aluno.id == incricao.id:
+                    found = True
+                    break
+            if found or (len(incricoes) + 1) > aula.limit:
+                continue
+            has_time = True
+            for aula_inscrita in self.aulas_inscritas:
+                if aula.horainicio <= aula_inscrita.horafinal and aula.horafinal >= aula_inscrita.horafinal:
+                    has_time = False
+                    break
+            if has_time:
                 self.aulas_inscrever.append(aula)
-                colsneeded = max(colsneeded, len(f"{aula.nome} ({aula.id}) - {aula.horainicio.strftime("%d/%m/%Y %H:%M")} -> {aula.horafinal.strftime("%d/%m/%Y %H:%M")}"))
+
         self.content.pad.resize(255, len("Aula: ") + colsneeded + 1 + 200) #-3 = header +1 no caso do terminal não suportar cores +200 - para dar para o texto do estado = 0
     def resize(self):
         self.vscrollbar.resize()
@@ -59,6 +76,7 @@ class PagAluno:
                 if len(self.aulas_inscrever) > 0:
                     aula = self.aulas_inscrever[self.vscrollbar.current]
                     self.content.tui.logica.AdicionarAlunoAaAula(self.aluno, aula)
+                    self.aulas_inscritas.append(aula)
                 self.switch()
         if ch == curses.KEY_BACKSPACE or ch == curses.ascii.BS:
             self.switch()

@@ -7,7 +7,6 @@ class PagAlunos:
         self.alunos = []
         self.vscrollbar = Scrollbar(self.content.tui, True)
         self.hscrollbar = Scrollbar(self.content.tui, False)
-        self.state = 0
     def preswitch(self):
         pass
     def resize(self):
@@ -18,6 +17,9 @@ class PagAlunos:
         self.alunos = self.content.tui.logica.db.ListarAlunos()
         self.vscrollbar.needed = True
         self.vscrollbar.max = len(self.alunos)
+
+        self.hscrollbar.resize()
+        self.vscrollbar.resize()
     def input(self, ch):
         if ch == curses.KEY_DOWN and self.vscrollbar.max > 0:
             self.vscrollbar.current = (self.vscrollbar.current + 1) % self.vscrollbar.max
@@ -39,10 +41,12 @@ class PagAlunos:
         page = self.content.pad
         selected_color = self.content.tui.selected_color
 
+        aluno = None
+
         def var_maior(alunos, attr):
             maior = 0
             for i in alunos:
-                maior = max(maior, len(str(getattr(i, attr))) +2)
+                maior = max(maior, len(str(getattr(i, attr))) + 2)
             return maior
         attrs = [("Nome","nome"), ("ID", "id"), ("Telefone", "telefone"), ("Email","email"), ("Morada", "morada"), ("Idade","idade")]
         alinhamentos = [c for attr in attrs if(c := var_maior(self.alunos, attr[1]))]
@@ -99,7 +103,7 @@ class PagAlunos:
                 page.addstr(line, offset, str(getattr(aluno, attr[1])), color)
                 offset += alinhamentos[i] + 1
             line+=1
-            if line >= 255:
+            if line >= 254:
                 break
         if cols_needed > self.content.tui.maxcols - 2: # -2 para o limite e para a scrollbar
             self.hscrollbar.needed = True

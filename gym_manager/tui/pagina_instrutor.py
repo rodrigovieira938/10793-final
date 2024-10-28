@@ -15,6 +15,9 @@ class PagInstrutor:
         self.aulas = self.content.tui.logica.db.ListartAulaDeInstrutor(self.instrutor)
         self.vscrollbar.needed = True
         self.vscrollbar.max = len(self.aulas)
+
+        self.hscrollbar.resize()
+        self.vscrollbar.resize()
     def resize(self):
         self.vscrollbar.resize()
         self.hscrollbar.resize()

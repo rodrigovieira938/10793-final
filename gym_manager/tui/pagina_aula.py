@@ -15,6 +15,9 @@ class PagAula:
         self.alunos = self.content.tui.logica.db.ListarInscricoesDeAula(self.aula)
         self.vscrollbar.needed = True
         self.vscrollbar.max = len(self.alunos)
+
+        self.hscrollbar.resize()
+        self.vscrollbar.resize()
     def resize(self):
         self.vscrollbar.resize()
         self.hscrollbar.resize()

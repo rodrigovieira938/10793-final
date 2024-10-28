@@ -94,7 +94,6 @@ class TextInput:
             return
         
         type = self.placeholders[self.state].type
-
         if ch == curses.KEY_BACKSPACE or ch == curses.ascii.BS:
             self.str = self.str[:-1]
         elif ch == ord("\n"):
@@ -264,6 +263,8 @@ class PagRegistrar:
         for instrutor in instrutores:
             maxcols = max(maxcols, len(f"{instrutor.nome} ({instrutor.id})"))
         self.content.pad.resize(255,maxcols+200) #+200 para dar espaço para o placeholder e os butões do estado = 0
+    
+        self.hscrollbar.resize()
     def resize(self):
         self.hscrollbar.resize()
     def input(self, ch):
