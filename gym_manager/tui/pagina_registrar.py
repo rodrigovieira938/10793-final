@@ -257,7 +257,7 @@ class PagRegistrar:
         self.state = 0
         self.selected = 0
     def switch(self):
-        self.content.pad.erase()
+        self.content.tui.screen.erase()
         self.resize()
         instrutores =  self.content.tui.logica.db.ListarInstrutores()
         maxcols = 0

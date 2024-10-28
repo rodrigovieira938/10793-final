@@ -11,6 +11,7 @@ class PagAulas:
     def preswitch(self):
         pass
     def switch(self):
+        self.content.tui.screen.erase()
         self.aulas = self.content.tui.logica.db.ListarAulaDeGrupo()
         self.vscrollbar.needed = True
         self.vscrollbar.max = len(self.aulas)

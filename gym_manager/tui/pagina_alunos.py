@@ -14,6 +14,7 @@ class PagAlunos:
         self.vscrollbar.resize()
         self.hscrollbar.resize()
     def switch(self):
+        self.content.tui.screen.erase()
         self.alunos = self.content.tui.logica.db.ListarAlunos()
         self.vscrollbar.needed = True
         self.vscrollbar.max = len(self.alunos)

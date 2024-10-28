@@ -6,7 +6,7 @@ class PagInicial:
     def preswitch(self):
         pass
     def switch(self):
-        self.content.pad.erase()
+        self.content.tui.screen.erase()
         self.resize()
     def resize(self):
         self.content.pad.resize(self.content.maxlines, self.content.maxcols)
