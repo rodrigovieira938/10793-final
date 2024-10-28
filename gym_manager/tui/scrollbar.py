@@ -19,7 +19,7 @@ class Scrollbar:
     def resize(self):
         self.maxlines = self.tui.maxlines
         self.maxcols = self.tui.maxcols
-        self.pad.clear()
+        self.pad.erase()
         if self.vertical:
             self.pad.resize(self.maxlines-3, 1)
         else:

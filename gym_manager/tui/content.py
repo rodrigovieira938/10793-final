@@ -37,7 +37,7 @@ class Content:
         self.maxlines = self.tui.maxlines
         self.pages[self.selected].resize()
     def render(self):
-        self.pad.clear()
+        self.pad.erase()
         self.pages[self.selected].render()
         self.pages[self.selected].refresh()
     def input(self, ch):
