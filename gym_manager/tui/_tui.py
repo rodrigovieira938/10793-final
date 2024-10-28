@@ -26,14 +26,6 @@ class Tui:
             TAB_WINDOW: Header(self), 
             CONTENT_WINDOW: Content(self),
         }
-
-#        for i in range(300):
-#            import datetime
-#            user1 = self.logica.CriarUtilizador(f"Aluno {i+1}", "111111111", f"aluno.{i+1}@gmail.com", f"Rua das Ruas {i+1}", 20)
-#            inst1 = self.logica.CriarInstructor(f"Instrutor {i+1}", "111111111", f"instrutor.{i+1}@gmail.com", f"Rua das Ruas {i+1}", 20)
-#            aula1 = self.logica.CriarAulaDeGrupo(f"Aula {i+1}", inst1, datetime.datetime.now() + datetime.timedelta(hours=1), datetime.datetime.now() + datetime.timedelta(hours=2), 20)
-#            self.logica.AdicionarAlunoAaAula(user1, aula1)
-
         self.__run()
 
     def __run(self):
