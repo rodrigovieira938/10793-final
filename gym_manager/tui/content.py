@@ -9,7 +9,7 @@ PAGINA_AULA = 7
 class Content:
     def __init__(self, tui: Tui):
         from .pagina_inicial import PagInicial
-        from .pagina_registrar import PagRegistrar
+        from .pagina_registar import PagRegistar
         from .pagina_alunos import PagAlunos
         from .pagina_instrutores import PagInstrutores
         from .pagina_aulas import PagAulas
@@ -24,7 +24,7 @@ class Content:
         self.selected = 0
         self.pages = [
             PagInicial(self),
-            PagRegistrar(self),
+            PagRegistar(self),
             PagAlunos(self),
             PagInstrutores(self),
             PagAulas(self),

@@ -240,15 +240,15 @@ class TimedMessage:
         else:
             return True
 # Estados:
-# 0 - selecionar o que registrar
-# 1 - registrar aluno
-# 2 - registrar instrutor
-# 3 - registrar aula de grupo
-class PagRegistrar:
+# 0 - selecionar o que registar
+# 1 - registar aluno
+# 2 - registar instrutor
+# 3 - registar aula de grupo
+class PagRegistar:
     def __init__(self, content : Content):
         self.content = content
         self.selected = 0
-        self.buttons = ["Registrar Aluno","Registrar Instrutor", "Registrar Aula de Grupo"]
+        self.buttons = ["Registar Aluno","Registar Instrutor", "Registar Aula de Grupo"]
         self.state = 0
         self.textinput = None
         self.hscrollbar = Scrollbar(self.content.tui, False)
